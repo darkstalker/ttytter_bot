@@ -1,0 +1,15 @@
+Requeriments:
+
+- ttytter (http://www.floodgap.com/software/ttytter/)
+- Perl 5.10
+- Perl modules: DBD::SQLite, Text::CSV_XS, HTML::Entities, Regexp::Common, DateTime, Hailo
+
+How to use this:
+
+- Dowload your twitter archive from https://twitter.com/settings/account
+- You'll receive a file called "tweets.zip", we need the "tweets.csv" file from it.
+- Run "build_brain.pl", it will read the tweets.csv file from the current directory or from a location in the argument.
+  This will generate the initial brain database "tweets.brn".
+- Run the file "test.pl" to generate random lines from the previously learned input.
+- Setup ttytter with your bot's account. The bot account must follow your account so it can keep learning from new tweets.
+- Start "run_bot.sh" to run ttytter with the supplied plugin.
