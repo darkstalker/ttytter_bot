@@ -1,8 +1,14 @@
-Requeriments:
+Requirements:
 
 - ttytter (http://www.floodgap.com/software/ttytter/)
 - Perl 5.10
-- Perl modules: DBD::SQLite, Text::CSV_XS, HTML::Entities, Regexp::Common, DateTime, Hailo
+- Perl modules:
+    DBD::SQLite
+    Text::CSV_XS
+    HTML::Entities
+    Regexp::Common
+    DateTime
+    Hailo
 
 How to use this:
 
@@ -13,3 +19,6 @@ How to use this:
 - Run the file "test.pl" to generate random lines from the previously learned input.
 - Setup ttytter with your bot's account. The bot account must follow your account so it can keep learning from new tweets.
 - Start "run_bot.sh" to run ttytter with the supplied plugin.
+  It will forward any extra arguments to ttytter:
+    $ ./run_bot.sh -ansi -readline      # interactive session
+    $ ./run_bot.sh -daemon -silent      # as background process
