@@ -11,7 +11,7 @@ use Hailo;
 sub new
 {
     my ($class, $file) = @_;
-    my $self = { brain_file => $file, last_tweet_id => 0, src_username => '' };
+    my $self = { brain_file => $file, last_tweet_id => 0, src_username => '', tweet_interval => 0, last_tweet_time => '' };
     bless $self, $class;
     return $self;
 }
@@ -107,10 +107,35 @@ sub can_tweet
     my ($self, $chance) = @_;
     $chance = 100 if !defined $chance;
     # tweet only from 12pm to 12am
-    my $hour = DateTime->now(time_zone => 'local')->hour;
-    return 0 if $hour >= 0 && $hour < 12;
-    #TODO: define a better method for setting the tweet frequency
-    return rand(100) < $chance;
+    my $now = DateTime->now(time_zone => 'local');
+    return 0 if $now->hour >= 0 && $now->hour < 12;
+    # check time interval between tweets
+    if ($self->{tweet_interval} and $self->{last_tweet_time})
+    {
+        my $diff = $now->delta_ms(_parse_datetime($self->{last_tweet_time}));
+        return 0 if $diff->minutes < $self->{tweet_interval};
+    }
+    # roll chance for tweeting
+    return 0 unless rand(100) < $chance;
+    # save last tweet time
+    $self->{last_tweet_time} = _serialize_datetime($now);
+    return 1;
+}
+
+# construct a DateTime object from a string
+sub _parse_datetime
+{
+    my ($str) = @_;
+    my @parts = split ',', $str;
+    die 'invalid argument' if @parts != 6;
+    return DateTime->new(time_zone => 'local', map { $_ => shift @parts } qw(year month day hour minute second));
+}
+
+# convert a DateTime object into a string
+sub _serialize_datetime
+{
+    my ($dt) = @_;
+    return $dt->ymd(',') . "," . $dt->hms(',')
 }
 
 # opens the brain file as a SQLite database to load/store additional settings
@@ -125,7 +150,7 @@ sub load_config
     my ($self, $last_id_ref) = @_;
     my $db = $self->_open_db();
     my $st = $db->prepare('SELECT text FROM info WHERE attribute = ?');
-    for (qw(last_tweet_id src_username))
+    for (qw(last_tweet_id src_username tweet_interval last_tweet_time))
     {
         $st->execute($_);
         if (my $row = $st->fetch)
@@ -144,7 +169,7 @@ sub save_config
     $self->{last_tweet_id} = $last_id;
     my $db = $self->_open_db();
     my $st = $db->prepare('INSERT OR REPLACE INTO info (attribute, text) VALUES (?,?)');
-    for (qw(last_tweet_id src_username))
+    for (qw(last_tweet_id src_username tweet_interval last_tweet_time))
     {
         $st->execute($_, $self->{$_});
     }
