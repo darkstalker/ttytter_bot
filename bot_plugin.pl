@@ -29,7 +29,7 @@ $conclude = sub {
 };
 
 $heartbeat = sub {
-    return if !$store->{bot}->can_tweet(10);
+    return if !$store->{bot}->can_tweet;
     my $msg = $store->{bot}->reply;
     #say $stdout "-- bot reply: $msg";
     updatest($msg);

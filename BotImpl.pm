@@ -18,6 +18,7 @@ sub new
             src_username => '',
             tweet_interval => 0,
             last_tweet_time => '',
+            tweet_chance => 100,
         },
     };
     bless $self, $class;
@@ -114,8 +115,7 @@ sub is_filtered_user
 # defines when the bot can tweet and the tweet frequency
 sub can_tweet
 {
-    my ($self, $chance) = @_;
-    $chance = 100 if !defined $chance;
+    my ($self) = @_;
     # tweet only from 12pm to 12am
     my $now = DateTime->now(time_zone => 'local');
     return 0 if $now->hour >= 0 && $now->hour < 12;
@@ -126,7 +126,7 @@ sub can_tweet
         return 0 if $diff->minutes < $self->settings->{tweet_interval};
     }
     # roll chance for tweeting
-    return 0 unless rand(100) < $chance;
+    return 0 unless rand(100) < $self->settings->{tweet_chance};
     # save last tweet time
     $self->settings->{last_tweet_time} = _serialize_datetime($now);
     return 1;
