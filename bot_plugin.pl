@@ -20,6 +20,7 @@ $handle = sub {
     goto END if $store->{bot}->is_filtered_user($user); # if enabled, listen to a single user
     my $text = descape($tweet->{text});
     $store->{bot}->learn($text);
+    $store->{bot}->settings->{last_learned_str} = $text;
 END:
     defaulthandle($tweet);
     return 1;
