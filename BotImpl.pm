@@ -11,7 +11,15 @@ use Hailo;
 sub new
 {
     my ($class, $file) = @_;
-    my $self = { brain_file => $file, last_tweet_id => 0, src_username => '', tweet_interval => 0, last_tweet_time => '' };
+    my $self = {
+        brain_file => $file,
+        settings => {
+            last_tweet_id => 0,
+            src_username => '',
+            tweet_interval => 0,
+            last_tweet_time => '',
+        },
+    };
     bless $self, $class;
     return $self;
 }
@@ -19,6 +27,11 @@ sub new
 sub bot
 {
     return $_[0]->{bot};
+}
+
+sub settings
+{
+    return $_[0]->{settings};
 }
 
 sub init_bot
@@ -60,10 +73,7 @@ sub learn_file
     $self->unload_bot;
 
     # inject additional settings into the brain database
-    my $db = $self->_open_db;
-    my $st = $db->prepare('INSERT INTO info (attribute, text) VALUES (?,?)');
-    $st->execute('last_tweet_id', $last_tweet_id);
-    $db->disconnect;
+    $self->save_config($last_tweet_id);
 }
 
 # learns from a string of text
@@ -98,7 +108,7 @@ sub _filter_tweet
 sub is_filtered_user
 {
     my ($self, $user) = @_;
-    return $self->{src_username} and $user ne $self->{src_username};
+    return $self->settings->{src_username} and $user ne $self->settings->{src_username};
 }
 
 # defines when the bot can tweet and the tweet frequency
@@ -110,15 +120,15 @@ sub can_tweet
     my $now = DateTime->now(time_zone => 'local');
     return 0 if $now->hour >= 0 && $now->hour < 12;
     # check time interval between tweets
-    if ($self->{tweet_interval} and $self->{last_tweet_time})
+    if ($self->settings->{tweet_interval} and $self->settings->{last_tweet_time})
     {
-        my $diff = $now->delta_ms(_parse_datetime($self->{last_tweet_time}));
-        return 0 if $diff->minutes < $self->{tweet_interval};
+        my $diff = $now->delta_ms(_parse_datetime($self->settings->{last_tweet_time}));
+        return 0 if $diff->minutes < $self->settings->{tweet_interval};
     }
     # roll chance for tweeting
     return 0 unless rand(100) < $chance;
     # save last tweet time
-    $self->{last_tweet_time} = _serialize_datetime($now);
+    $self->settings->{last_tweet_time} = _serialize_datetime($now);
     return 1;
 }
 
@@ -150,29 +160,26 @@ sub load_config
     my ($self, $last_id_ref) = @_;
     my $db = $self->_open_db();
     my $st = $db->prepare('SELECT text FROM info WHERE attribute = ?');
-    for (qw(last_tweet_id src_username tweet_interval last_tweet_time))
+    for (keys %{$self->settings})
     {
         $st->execute($_);
         if (my $row = $st->fetch)
         {
-            $self->{$_} = $row->[0];
+            $self->settings->{$_} = $row->[0];
         }
         $st->finish;
     }
     $db->disconnect;
-    $$last_id_ref = $self->{last_tweet_id}; #TODO: better way of accessing the global var
+    $$last_id_ref = $self->settings->{last_tweet_id}; #TODO: need a better way of accessing the global var
 }
 
 sub save_config
 {
     my ($self, $last_id) = @_;
-    $self->{last_tweet_id} = $last_id;
+    $self->settings->{last_tweet_id} = $last_id; #TODO: need a better way of accessing the global var
     my $db = $self->_open_db();
     my $st = $db->prepare('INSERT OR REPLACE INTO info (attribute, text) VALUES (?,?)');
-    for (qw(last_tweet_id src_username tweet_interval last_tweet_time))
-    {
-        $st->execute($_, $self->{$_});
-    }
+    $st->execute($_, $self->settings->{$_}) for (keys %{$self->settings});
     $db->disconnect;
 }
 
