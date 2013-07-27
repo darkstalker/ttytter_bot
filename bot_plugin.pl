@@ -6,7 +6,7 @@ use vars qw($handle $conclude $addaction $heartbeat $store $stdout $last_id $who
 $extension_mode = $EM_SCRIPT_OFF;
 
 $store->{bot} = BotImpl->new('tweets.brn');
-$store->{bot}->load_config(\$last_id);
+$store->{bot}->load_config({ last_tweet_id => \$last_id });
 $store->{bot}->init_bot;
 
 $handle = sub {
@@ -25,7 +25,7 @@ END:
 };
 
 $conclude = sub {
-    $store->{bot}->save_config($last_id);
+    $store->{bot}->save_config({ last_tweet_id => $last_id });
     defaultconclude();
 };
 
@@ -55,7 +55,7 @@ $addaction = sub {
     }
     elsif ($cmd =~ /^\/save\s?(.*)/)
     {
-        $store->{bot}->save_config($last_id);
+        $store->{bot}->save_config({ last_tweet_id => $last_id });
         return 1;
     }
     return 0;

@@ -74,7 +74,7 @@ sub learn_file
     $self->unload_bot;
 
     # inject additional settings into the brain database
-    $self->save_config($last_tweet_id);
+    $self->save_config({ last_tweet_id => $last_tweet_id });
 }
 
 # learns from a string of text
@@ -157,7 +157,7 @@ sub _open_db
 
 sub load_config
 {
-    my ($self, $last_id_ref) = @_;
+    my ($self, $ext_vars) = @_;
     my $db = $self->_open_db();
     my $st = $db->prepare('SELECT text FROM info WHERE attribute = ?');
     for (keys %{$self->settings})
@@ -170,13 +170,23 @@ sub load_config
         $st->finish;
     }
     $db->disconnect;
-    $$last_id_ref = $self->settings->{last_tweet_id}; #TODO: need a better way of accessing the global var
+
+    # write values into the passed references (conf_key => \$external_var)
+    if (defined $ext_vars)
+    {
+        ${$ext_vars->{$_}} = $self->settings->{$_} for (keys %$ext_vars);
+    }
 }
 
 sub save_config
 {
-    my ($self, $last_id) = @_;
-    $self->settings->{last_tweet_id} = $last_id; #TODO: need a better way of accessing the global var
+    my ($self, $ext_vars) = @_;
+    # read values from the passed variables (conf_key => $external_var)
+    if (defined $ext_vars)
+    {
+        $self->settings->{$_} = $ext_vars->{$_} for (keys %$ext_vars);
+    }
+
     my $db = $self->_open_db();
     my $st = $db->prepare('INSERT OR REPLACE INTO info (attribute, text) VALUES (?,?)');
     $st->execute($_, $self->settings->{$_}) for (keys %{$self->settings});
