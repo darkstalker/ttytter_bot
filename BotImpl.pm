@@ -105,11 +105,18 @@ sub _filter_tweet
     return $str;
 }
 
-# implements the single user listening setting
+# if enabled, listens to tweets only from the user we're currently tracking (src_username)
 sub is_filtered_user
 {
     my ($self, $user) = @_;
     return $self->settings->{src_username} and $user ne $self->settings->{src_username};
+}
+
+# enable tracking from the target user, so we can see all the replies
+sub setup_tracking
+{
+    my ($self, $track_ref) = @_;
+    $$track_ref = 'from:' . $self->settings->{src_username} if $self->settings->{src_username};
 }
 
 # defines when the bot can tweet and the tweet frequency

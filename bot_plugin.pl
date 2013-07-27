@@ -2,11 +2,12 @@ use 5.010;
 use strict;
 use BotImpl;
 
-use vars qw($handle $conclude $addaction $heartbeat $store $stdout $last_id $whoami $extension_mode $EM_SCRIPT_OFF);
+use vars qw($handle $conclude $addaction $heartbeat $store $stdout $last_id $whoami $track $extension_mode $EM_SCRIPT_OFF);
 $extension_mode = $EM_SCRIPT_OFF;
 
 $store->{bot} = BotImpl->new('tweets.brn');
 $store->{bot}->load_config({ last_tweet_id => \$last_id });
+$store->{bot}->setup_tracking(\$track);
 $store->{bot}->init_bot;
 
 $handle = sub {
