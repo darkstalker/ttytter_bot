@@ -10,7 +10,8 @@ $store->{bot}->load_config(\$last_id);
 $store->{bot}->init_bot;
 
 $handle = sub {
-    my ($tweet) = @_;
+    my ($tweet, $source_cmd) = @_;
+    goto END if $source_cmd;                            # skip duplicated tweets
     goto END if $tweet->{user}->{protected} eq 'true';  # skip protected tweets
     goto END if defined $tweet->{retweeted_status};     # skip RT's
     my $user = descape($tweet->{user}->{screen_name});
