@@ -109,7 +109,7 @@ sub _filter_tweet
 sub is_filtered_user
 {
     my ($self, $user) = @_;
-    return $self->settings->{src_username} and $user ne $self->settings->{src_username};
+    return $self->settings->{src_username} ? $user ne $self->settings->{src_username} : 0;
 }
 
 # enable tracking from the target user, so we can see all the replies
