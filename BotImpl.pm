@@ -123,7 +123,7 @@ sub can_tweet
     if ($self->settings->{tweet_interval} and $self->settings->{last_tweet_time})
     {
         my $diff = $now->delta_ms(_parse_datetime($self->settings->{last_tweet_time}));
-        return 0 if $diff->minutes < $self->settings->{tweet_interval};
+        return 0 if $diff->{minutes} < $self->settings->{tweet_interval};
     }
     # roll chance for tweeting
     return 0 unless rand(100) < $self->settings->{tweet_chance};
