@@ -80,8 +80,10 @@ sub learn_file
 # learns from a string of text
 sub learn
 {
-    my ($self, $text) = @_;
-    $self->bot->learn(_filter_tweet($text));
+    my ($self, $raw_text) = @_;
+    my $text = _filter_tweet($raw_text);
+    $self->bot->learn($text);
+    $self->settings->{last_learned_str} = $text;
 }
 
 # generates a random reply, related to $text if defined
