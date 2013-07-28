@@ -132,11 +132,10 @@ sub can_tweet
         my $diff = $now->delta_ms(_parse_datetime($self->settings->{last_tweet_time}));
         return 0 if $diff->{minutes} < $self->settings->{tweet_interval};
     }
-    # roll chance for tweeting
-    return 0 unless rand(100) < $self->settings->{tweet_chance};
-    # save last tweet time
+    # save last tweet attempt time
     $self->settings->{last_tweet_time} = _serialize_datetime($now);
-    return 1;
+    # roll chance for tweeting
+    return rand(100) < $self->settings->{tweet_chance};
 }
 
 # construct a DateTime object from a string
