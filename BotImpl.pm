@@ -19,6 +19,7 @@ sub new
             tweet_interval => 0,
             last_tweet_time => '',
             tweet_chance => 100,
+            answer_replies => 0,
         },
     };
     bless $self, $class;
@@ -89,10 +90,15 @@ sub learn
 # generates a random reply, related to $text if defined
 sub reply
 {
-    my ($self, $text) = @_;
+    my ($self, $raw_text, $max_len) = @_;
+    my $text = _filter_tweet($raw_text) if defined $raw_text;
+    $max_len = 140 if !defined $max_len;
     my $msg = $self->bot->reply($text);
-    # remove last words if generated text is longer than 140 characters
-    $msg =~ s/\s+\S+\s*$// while (length $msg > 140);
+    # remove last words if generated text is longer than $max_len characters
+    if ($max_len > 0)
+    {
+        $msg =~ s/\s+\S+\s*$// while (length $msg > $max_len);
+    }
     return $msg;
 }
 

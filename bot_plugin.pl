@@ -17,8 +17,18 @@ $handle = sub {
     goto END if defined $tweet->{retweeted_status};     # skip RT's
     my $user = descape($tweet->{user}->{screen_name});
     goto END if $user eq $whoami;                       # skip own tweets
-    goto END if $store->{bot}->is_filtered_user($user); # if enabled, listen to a single user
     my $text = descape($tweet->{text});
+    if ($store->{bot}->settings->{answer_replies})      # if enabled, answer replies
+    {
+        my $reply_to = descape($tweet->{in_reply_to_screen_name});
+        if ($reply_to eq $whoami)
+        {
+            my $at_str = "\@$user ";
+            my $msg = $at_str . $store->{bot}->reply($text, 140 - length($at_str));
+            updatest($msg, 0, $tweet->{id_str});
+        }
+    }
+    goto END if $store->{bot}->is_filtered_user($user); # if enabled, listen to a single user
     $store->{bot}->learn($text);
 END:
     defaulthandle($tweet);
