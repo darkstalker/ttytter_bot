@@ -9,7 +9,7 @@ $store->{bot} = BotImpl->new('tweets.brn');
 $store->{bot}->load_config({ last_tweet_id => \$last_id });
 setvariable('dostream', 1);
 setvariable('ssl', 1);
-$store->{bot}->setup_tracking(\$track);
+setvariable('streamallreplies', 1) if $store->{bot}->settings->{src_username};
 $store->{bot}->init_bot;
 
 $handle = sub {

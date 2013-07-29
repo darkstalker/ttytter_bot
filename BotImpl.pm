@@ -120,13 +120,6 @@ sub is_filtered_user
     return $self->settings->{src_username} ? $user ne $self->settings->{src_username} : 0;
 }
 
-# enable tracking from the target user, so we can see all the replies
-sub setup_tracking
-{
-    my ($self, $track_ref) = @_;
-    $$track_ref = 'from:' . $self->settings->{src_username} if $self->settings->{src_username};
-}
-
 # defines when the bot can tweet and the tweet frequency
 sub can_tweet
 {
