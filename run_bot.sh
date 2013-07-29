@@ -1,2 +1,2 @@
 #!/bin/sh
-exec ttytter -dostream -ssl -exts=bot_plugin.pl "$@"
+exec ttytter -exts=bot_plugin.pl "$@"

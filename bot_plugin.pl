@@ -7,6 +7,8 @@ $extension_mode = $EM_SCRIPT_OFF;
 
 $store->{bot} = BotImpl->new('tweets.brn');
 $store->{bot}->load_config({ last_tweet_id => \$last_id });
+setvariable('dostream', 1);
+setvariable('ssl', 1);
 $store->{bot}->setup_tracking(\$track);
 $store->{bot}->init_bot;
 
