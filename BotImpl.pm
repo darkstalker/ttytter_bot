@@ -16,7 +16,7 @@ sub new
         settings => {
             last_tweet_id => 0,
             src_username => '',
-            tweet_interval => 0,
+            tweet_interval => 15,
             last_tweet_time => '',
             tweet_chance => 100,
             answer_replies => 0,
