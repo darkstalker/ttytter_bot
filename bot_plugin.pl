@@ -2,15 +2,15 @@ use 5.010;
 use strict;
 use BotImpl;
 
-use vars qw($handle $conclude $addaction $heartbeat $store $stdout $last_id $whoami $track $extension_mode $EM_SCRIPT_OFF);
+use vars qw($handle $conclude $addaction $heartbeat $stdout $last_id $whoami $extension_mode $EM_SCRIPT_OFF);
 $extension_mode = $EM_SCRIPT_OFF;
 
-$store->{bot} = BotImpl->new('tweets.brn');
-$store->{bot}->load_config({ last_tweet_id => \$last_id });
+my $bot = BotImpl->new('tweets.brn');
+$bot->load_config({ last_tweet_id => \$last_id });
 setvariable('dostream', 1);
 setvariable('ssl', 1);
-setvariable('streamallreplies', 1) if $store->{bot}->settings->{src_username};
-$store->{bot}->init_bot;
+setvariable('streamallreplies', 1) if $bot->settings->{src_username};
+$bot->init_bot;
 
 $handle = sub {
     my ($tweet, $source_cmd) = @_;
@@ -20,31 +20,31 @@ $handle = sub {
     my $user = descape($tweet->{user}->{screen_name});
     goto END if $user eq $whoami;                       # skip own tweets
     my $text = descape($tweet->{text});
-    if ($store->{bot}->settings->{answer_replies})      # if enabled, answer replies
+    if ($bot->settings->{answer_replies})               # if enabled, answer replies
     {
         my $reply_to = descape($tweet->{in_reply_to_screen_name});
         if ($reply_to eq $whoami)
         {
             my $at_str = "\@$user ";
-            my $msg = $at_str . $store->{bot}->reply($text, 140 - length($at_str));
+            my $msg = $at_str . $bot->reply($text, 140 - length($at_str));
             updatest($msg, 0, $tweet->{id_str});
         }
     }
-    goto END if $store->{bot}->is_filtered_user($user); # if enabled, listen to a single user
-    $store->{bot}->learn($text);
+    goto END if $bot->is_filtered_user($user);          # if enabled, listen to a single user
+    $bot->learn($text);
 END:
     defaulthandle($tweet);
     return 1;
 };
 
 $conclude = sub {
-    $store->{bot}->save_config({ last_tweet_id => $last_id });
+    $bot->save_config({ last_tweet_id => $last_id });
     defaultconclude();
 };
 
 $heartbeat = sub {
-    return if !$store->{bot}->can_tweet;
-    my $msg = $store->{bot}->reply;
+    return if !$bot->can_tweet;
+    my $msg = $bot->reply;
     #say $stdout "-- bot reply: $msg";
     updatest($msg);
 };
@@ -55,20 +55,20 @@ $addaction = sub {
     my ($cmd) = @_;
     if ($cmd =~ /^\/botreply\s?(.*)/)
     {
-        say $stdout "-- bot reply '$1'";
-        my $msg = $store->{bot}->reply($1);
+        my $msg = $bot->reply($1);
+        #say $stdout "-- bot reply: $msg";
         updatest($msg);
         return 1;
     }
     elsif ($cmd =~ /^\/botsrc\s?(.*)/)
     {
         say $stdout "-- bot src_username = '$1'";
-        $store->{bot}->{src_username} = $1;
+        $bot->{src_username} = $1;
         return 1;
     }
     elsif ($cmd =~ /^\/save\s?(.*)/)
     {
-        $store->{bot}->save_config({ last_tweet_id => $last_id });
+        $bot->save_config({ last_tweet_id => $last_id });
         return 1;
     }
     return 0;
