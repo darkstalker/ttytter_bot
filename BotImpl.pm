@@ -83,6 +83,7 @@ sub learn
 {
     my ($self, $raw_text) = @_;
     my $text = _filter_tweet($raw_text);
+    $self->init_bot;
     $self->bot->learn($text);
     $self->settings->{last_learned_str} = $text;
 }
@@ -93,6 +94,7 @@ sub reply
     my ($self, $raw_text, $max_len) = @_;
     my $text = _filter_tweet($raw_text) if defined $raw_text;
     $max_len = 140 if !defined $max_len;
+    $self->init_bot;
     my $msg = $self->bot->reply($text);
     # remove last words if generated text is longer than $max_len characters
     if ($max_len > 0)

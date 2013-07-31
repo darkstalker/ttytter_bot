@@ -10,7 +10,6 @@ $bot->load_config({ last_tweet_id => \$last_id });
 setvariable('dostream', 1);
 setvariable('ssl', 1);
 setvariable('streamallreplies', 1) if $bot->settings->{src_username};
-$bot->init_bot;
 
 $handle = sub {
     my ($tweet, $source_cmd) = @_;
