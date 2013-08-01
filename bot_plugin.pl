@@ -9,6 +9,7 @@ my $bot = BotImpl->new('tweets.brn');
 $bot->load_config({ last_tweet_id => \$last_id });
 setvariable('dostream', 1);
 setvariable('ssl', 1);
+setvariable('slowpost', 2);
 setvariable('streamallreplies', 1) if $bot->settings->{src_username};
 
 $handle = sub {
