@@ -2,7 +2,7 @@ use 5.010;
 use strict;
 use BotImpl;
 
-use vars qw($handle $conclude $addaction $heartbeat $stdout $last_id $whoami $store $shutdown $extension_mode $EM_SCRIPT_OFF);
+use vars qw($handle $conclude $addaction $heartbeat $stdout $last_id $whoami $store $extension_mode $EM_SCRIPT_OFF);
 $extension_mode = $EM_SCRIPT_OFF;
 
 my $bot = BotImpl->new('tweets.brn');
@@ -49,10 +49,6 @@ $heartbeat = sub {
     my $msg = $bot->reply;
     #say $stdout "-- bot reply: $msg";
     updatest($msg);
-};
-
-$shutdown = sub {
-    handle_ext_settings(1);
 };
 
 # this runs on a different process, so we see $store as it was before the process fork'ed
