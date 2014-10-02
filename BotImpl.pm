@@ -3,7 +3,7 @@ use 5.010;
 use strict;
 use DBI;
 use Text::CSV_XS;
-use HTML::Entities;
+use HTML::HTML5::Entities;
 use Regexp::Common qw(URI);
 use DateTime;
 use Hailo;

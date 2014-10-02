@@ -5,7 +5,7 @@ Requirements:
 - Perl modules:
     DBD::SQLite
     Text::CSV_XS
-    HTML::Entities
+    HTML::HTML5::Entities
     Regexp::Common
     DateTime
     Hailo
