@@ -20,6 +20,7 @@ sub new
             last_tweet_time => '',
             tweet_chance => 100,
             answer_replies => 0,
+            timezone => 'local',
         },
     };
     bless $self, $class;
@@ -127,12 +128,12 @@ sub can_tweet
 {
     my ($self) = @_;
     # tweet only from 12pm to 12am
-    my $now = DateTime->now(time_zone => 'local');
+    my $now = DateTime->now(time_zone => $self->settings->{timezone});
     return 0 if $now->hour >= 0 && $now->hour < 12;
     # check time interval between tweets
     if ($self->settings->{tweet_interval} and $self->settings->{last_tweet_time})
     {
-        my $diff = $now->delta_ms(_parse_datetime($self->settings->{last_tweet_time}));
+        my $diff = $now->delta_ms($self->_parse_datetime($self->settings->{last_tweet_time}));
         return 0 if $diff->{minutes} < $self->settings->{tweet_interval};
     }
     # save last tweet attempt time
@@ -144,10 +145,10 @@ sub can_tweet
 # construct a DateTime object from a string
 sub _parse_datetime
 {
-    my ($str) = @_;
+    my ($self, $str) = @_;
     my @parts = split ',', $str;
     die 'invalid argument' if @parts != 6;
-    return DateTime->new(time_zone => 'local', map { $_ => shift @parts } qw(year month day hour minute second));
+    return DateTime->new(time_zone => $self->settings->{timezone}, map { $_ => shift @parts } qw(year month day hour minute second));
 }
 
 # convert a DateTime object into a string
